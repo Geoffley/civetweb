@@ -1,0 +1,47 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+
+function GuessingGame() {
+  const [balance, setBalance] = useState(100);
+  const [userGuess, setUserGuess] = useState('');
+  const [result, setResult] = useState('');
+
+  const handleGuess = async () => {
+    try {
+      const response = await axios.post('/api/guess', { guess: userGuess });
+      const { randomNumber, winningAmount, newBalance } = response.data;
+      setBalance(newBalance);
+      setResult(`The random number was ${randomNumber}. Your new balance is $${newBalance}.`);
+    } catch (error) {
+      console.error('Error making a guess:', error);
+    }
+  };
+
+  const handleNewGame = async () => {
+    try {
+      const response = await axios.post('/api/new-game');
+      setBalance(response.data.balance);
+      setResult('');
+    } catch (error) {
+      console.error('Error starting a new game:', error);
+    }
+  };
+
+  return (
+    <div>
+      <h1>Guessing Game</h1>
+      <p>Your balance: ${balance}</p>
+      <input
+        type="number"
+        value={userGuess}
+        onChange={(e) => setUserGuess(e.target.value)}
+        placeholder="Guess a number between 1 and 10"
+      />
+      <button onClick={handleGuess}>Make a Guess</button>
+      <button onClick={handleNewGame}>New Game</button>
+      {result && <p>{result}</p>}
+    </div>
+  );
+}
+
+export default GuessingGame;
